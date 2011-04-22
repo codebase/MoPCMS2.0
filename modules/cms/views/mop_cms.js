@@ -14,8 +14,8 @@ mop.modules.CMS = new Class({
 	editSlugLink: null,
 	deletePageLink: null,
 	initialize: function( anElement, options ){
-//        console.log( "CMS INIT", this.childModules );
 		this.parent( anElement, null, options );		
+        console.log( "CMS INIT", this.childModules );
 		this.objectId = this.getValueFromClassName( "objectId" );
 	},
 	
@@ -170,12 +170,12 @@ mop.modules.CMS = new Class({
 	getModule: function(){ return this; },
 	
 	/*
-	Function: togglePublishedStatus
+	Function: togglePublished
 	Sends page publish toggle ajax call 
 	Argument: pageId {Number}
 	Callback: onTogglePublish
 	*/
-	togglePublishedStatus: function( nodeId ){
+	togglePublished: function( nodeId ){
 		new Request.JSON({
 			url: mop.util.getAppURL() + "cms/ajax/togglePublish/"+ nodeId
 //			onComplete: this.onPublishedStatusToggled
