@@ -203,6 +203,7 @@ Class mop {
 
 		$data = array();
 
+		$object = null;
     if($view == 'default'){
 			$object = ORM::Factory('page', $slug);
 			if(!$object->loaded){
@@ -216,15 +217,18 @@ Class mop {
 		if(!$viewConfig){
 			die("No View setup in frontend.xml by that name: $view");
 		}
-		if($viewConfig->getAttribute('loadPage')){
+		if($viewConfig->getAttribute('loadPage') =='true'){
 			$object = ORM::Factory('page', $slug);
 			if(!$object->loaded){
 				die('mop::getViewContent : View specifies loadPage but no page to load');
 			}
 			$data['content']['main'] = $object->getPageContent();
     }
-
-    $includeContent = mop::getIncludeContent($viewConfig, $object->id);
+		if($object){
+			$includeContent = mop::getIncludeContent($viewConfig, $object->id);
+		} else {
+			$includeContent = mop::getIncludeContent($viewConfig);
+		}
     foreach($includeContent as $key=>$values){
       $data['content'][$key] = $values;
     }
@@ -263,7 +267,7 @@ Class mop {
 		return $data;
 	}
 
-  function getIncludeContent($includeTier, $parentid){
+  function getIncludeContent($includeTier, $parentid = Null){
     $content = array();
     if($eDataNodes = mop::config('frontend',"includeData", $includeTier)){
       foreach($eDataNodes as $eDataConfig){
@@ -271,17 +275,18 @@ Class mop {
         $objects = ORM::Factory('page');
 
         //apply optional parent filter
-        if($from = $eDataConfig->getAttribute('from')){
-          if($from=='parent'){
-            $objects->where('parentid', $parentid);
-          } else {
-            $from = ORM::Factory('page', $from);
-            $objects->where('parentid', $from->id);	
-          }
-        }
+        $from = $eDataConfig->getAttribute('from');
+				if($from=='parent' && $parentid != null){
+					$objects->where('parentid', $parentid);
+				} else if($from){
+					$from = ORM::Factory('page', $from);
+					$objects->where('parentid', $from->id);	
+				}
 
         //apply optional template filter
-        $objects = $objects->templateFilter($eDataConfig->getAttribute('templateFilter'));
+				if($template = $eDataConfig->getAttribute('templateFilter')){
+					$objects = $objects->templateFilter($template);
+				}
 
         //apply optional SQL where filter
         if($where = $eDataConfig->getAttribute('where')){
@@ -294,6 +299,7 @@ Class mop {
 
         $label = $eDataConfig->getAttribute('label');
         $items = array();
+				echo count($objects);
         foreach($objects as $includeObject){
           $itemsData = $includeObject->getContent();
           $itemsData = array_merge($itemsData, mop::getIncludeContent($eDataConfig, $includeObject->id ) );
