@@ -1,11 +1,6 @@
 mop.ui = {};
 mop.ui.navigation = {};
 
-Locale.define('en-US', 'DatePicker', {
-	select_a_time: 'Select a time',
-	use_mouse_wheel: 'Use the mouse wheel to quickly change value',
-	time_confirm_button: 'OK'
-});
 
 Element.implement({
     smartDispose: function() {
@@ -158,7 +153,7 @@ mop.ui.navigation.BreadCrumbTrail = new Class({
 	},
 
 	addCrumb: function( obj ){
-        console.log( this.toString(), obj );
+
 		var crumb = new Element( "a", {
 			"text": obj.label,
 			"events":{
@@ -511,6 +506,7 @@ mop.ui.UIElement = new Class({
 		this.destroyValidationSticky();
 		
 		delete this.element;
+		delete this.elementClass;
 		delete this.fieldName;
 		delete this.autoSubmit;
 
@@ -524,6 +520,7 @@ mop.ui.UIElement = new Class({
 
 		this.element = null;
 		this.marshal = null;
+		this.elementClass = null;
 		this.fieldName = null;
 		this.autoSubmit = null;
 		
@@ -1376,7 +1373,7 @@ mop.ui.MultiSelect = new Class({
 	onDocumentClicked: function( e ){
 		mop.util.stopEvent( e );
 	    if( e.target == this.saveButton || e.target == this.cancelButton ) return;
-	    if(	$chk( e ) && ( e.target == this.multiBox || this.multiBox.contains( e.target ) ) ) return;
+	    if(	$chk( e ) && ( e.target == this.multiBox || this.multiBox.hasChild( e.target ) ) ) return;
 //	    console.log( "onDocumentClicked" );
 	    this.updateAndClose( e );
 	},
@@ -1453,6 +1450,7 @@ mop.ui.MultiSelect = new Class({
 	},
 	
 	updateAndClose: function(){
+//		console.log( 'updateAndClose', e, e.target, this.multiBox, this.multiBox.hasChild( e.target ) );
 		this.ogSelect.removeEvents();
 		this.updateOgSelect();
 //		console.log( "updateAndClose", this.ogSelect.getSelected().length );
@@ -1575,6 +1573,240 @@ mop.ui.VisibilityToggler = new Class({
 	
 });
 
+mop.ui.ExtendedMonkeyPhysicsDatePicker = new Class({
+
+	Extends: DatePicker,
+
+	Implements: [ Events, Options ],
+
+	initialize: function( attachTo, aMarshal, options ){
+		this.marshal = aMarshal;
+		this.attachTo = attachTo;
+
+		this.setOptions( options );
+
+		//i dont know why i need to do this, setOptions doesnt seem to be adding the "on" Methods to the options array during setoptions... im sure i am just understanding something wrong.
+		this.options.onShow = options.onShow;
+		this.options.onSelect = options.onSelect;
+		this.options.onClose = options.onClose;
+
+		this.attach();
+
+		if (this.options.timePickerOnly) {
+			this.options.timePicker = true;
+			this.options.startView = 'time';
+		}
+
+		this.formatMinMaxDates();
+		document.addEvent('mousedown', this.close.bind(this));
+//		console.log( this.toString(), options, this.options );
+
+	},
+
+	select: function( values ) {
+		this.choice = $merge(this.choice, values);
+		var d = this.dateFromObject(this.choice);
+		this.input.set('value', this.format(d, this.options.inputOutputFormat));
+		this.visual.set('value', this.format(d, this.options.format));
+		this.options.onSelect();
+		this.close(null, true);
+	},
+
+	constructPicker: function() {
+
+		this.picker = new Element( 'div', { 'class': this.options.pickerClass }).inject(document.body);
+		if( this.options.elementId ) this.picker.set( "id", this.options.elementId );
+
+		if (this.options.useFadeInOut) {
+			this.picker.setStyle('opacity', 0).set('tween', { duration: this.options.animationDuration });
+		}
+
+		var h = new Element('div', { 'class': 'header' }).inject(this.picker);
+		var titlecontainer = new Element('div', { 'class': 'title' }).inject(h);
+		new Element('div', { 'class': 'previous' }).addEvent('click', this.previous.bind(this)).set('text', '«').inject(h);
+		new Element('div', { 'class': 'next' }).addEvent('click', this.next.bind(this)).set('text', '»').inject(h);
+		new Element('div', { 'class': 'closeButton' }).addEvent('click', this.close.bindWithEvent(this, true)).set('text', 'x').inject(h);
+		new Element('span', { 'class': 'titleText' }).addEvent('click', this.zoomOut.bind(this)).inject(titlecontainer);
+
+		var b = new Element('div', { 'class': 'body' }).inject(this.picker);
+		this.bodysize = b.getSize();
+		this.slider = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: 2 * this.bodysize.x, height: this.bodysize.y }}).set('tween', { duration: this.options.animationDuration, transition: Fx.Transitions.Quad.easeInOut }).inject(b);
+		this.oldContents = new Element('div', { styles: { position: 'absolute', top: 0, left: this.bodysize.x, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
+		this.newContents = new Element('div', { styles: { position: 'absolute', top: 0, left: 0, width: this.bodysize.x, height: this.bodysize.y }}).inject(this.slider);
+	},
+
+	toString: function(){
+		return "[ Object, DatePicker, mop.ui.ExtendedMonkeyPhysicsDatePicker ]";
+	},
+
+	getDate: function(){
+		return this.dateFromObject( this.choice );
+	},
+
+	show: function( position, timestamp){
+
+		this.parent( position, timestamp );
+		var depth = mop.DepthManager.incrementDepth();
+
+//		console.log( this.toString(), "show", this.marshal.scrollContext );
+		if( this.marshal.scrollContext == 'modal' ){
+			mop.ModalManager.addListener( this );
+			this.addEvent( "modalScroll", this.onModalScroll.bind( this ) );
+		}
+		mop.util.EventManager.addListener( this );
+		this.addEvent( "resize", this.reposition.bind( this ) );
+
+		this.reposition();
+		this.picker.setStyle( "z-index", depth );
+
+	},
+
+	setDate: function( date ){
+		this.select( { year: date.getFullYear(), month: date.getMonth(), day: date.getDate() } );
+	},
+
+	attach: function() {
+		// toggle the datepicker through a separate element?
+		if ($chk(this.options.toggleElements)) {
+			var togglers = $$(this.options.toggleElements);
+			document.addEvents({
+				'keydown': function(e) {
+					if (e.key == "tab") {
+						this.close(null, true);
+					}
+				}.bind(this)
+			});
+		};
+
+		// attach functionality to the inputs		
+		$$(this.attachTo).each(function(item, index) {
+
+			// never double attach
+			if (item.retrieve('datepicker')) return;
+
+			// determine starting value(s)
+			if ($chk(item.get('value'))) {
+				var init_clone_val = this.format(new Date(this.unformat(item.get('value'), this.options.inputOutputFormat)), this.options.format);
+			} else if (!this.options.allowEmpty) {
+				var init_clone_val = this.format(new Date(), this.options.format);
+			} else {
+				var init_clone_val = '';
+			}
+
+			// create clone
+			var display = item.getStyle('display');
+			var clone = item
+			.setStyle('display', this.options.debug ? display : 'none')
+			.store('datepicker', true) // to prevent double attachment...
+			.clone()
+			.store('datepicker', true) // ...even for the clone (!)
+			.removeProperty('name')    // secure clean (form)submission
+			.setStyle('display', display)
+			.set('value', init_clone_val)
+			.inject(item, 'after');
+
+			/*added by thiago@madeofpeople.org */
+			this.input = item;
+			this.visual = clone;
+			/*end modificiations*/
+
+			// events
+			if ($chk(this.options.toggleElements)) {
+				togglers[index]
+					.setStyle('cursor', 'pointer')
+					.addEvents({
+						'click': function(e) {
+							this.onFocus(item, clone);
+						}.bind(this)
+					});
+				clone.addEvents({
+					'blur': function() {
+						item.set('value', clone.get('value'));
+					}
+				});
+			} else {
+				clone.addEvents({
+					'keydown': function(e) {
+						if (this.options.allowEmpty && (e.key == "delete" || e.key == "backspace")) {
+							item.set('value', '');
+							e.target.set('value', '');
+							this.close(null, true);
+						} else if (e.key == "tab") {
+							this.close(null, true);
+						} else {
+							mop.util.stopEvent( e );
+						}
+					}.bind(this),
+					'focus': function(e) {
+						this.onFocus(item, clone);
+					}.bind(this)
+				});
+			}
+		}.bind(this));
+	},
+
+	onFocus: function(original_input, visual_input) {
+
+		var init_visual_date, d = visual_input.getCoordinates();
+
+		if ($chk(original_input.get('value'))) {
+			init_visual_date = this.unformat(original_input.get('value'), this.options.inputOutputFormat).valueOf();
+		} else {
+			init_visual_date = new Date();
+			if ($chk(this.options.maxDate) && init_visual_date.valueOf() > this.options.maxDate.valueOf()) {
+				init_visual_date = new Date(this.options.maxDate.valueOf());
+			}
+			if ($chk(this.options.minDate) && init_visual_date.valueOf() < this.options.minDate.valueOf()) {
+				init_visual_date = new Date(this.options.minDate.valueOf());
+			}
+		}
+
+		this.show({ left: d.left + this.options.positionOffset.x, top: d.top + d.height + this.options.positionOffset.y }, init_visual_date);
+		this.input = original_input;
+		this.visual = visual_input;
+//		console.log( this.toString(), "onFocus", this.options );
+		this.options.onShow();
+	},
+
+	getValue: function(){
+		return this.input.get( 'value' );
+	},
+
+	setValue: function( aValue ){
+		if( aValue == null && this.allowEmpty ){
+			this.attachTo.set( 'value', aValue );
+			this.visual.set( "value", aValue );
+		}else{
+			this.attachTo.set( 'value', aValue );
+			this.visual.set( "value", aValue );
+		}		
+	},
+
+	onModalScroll: function( ){
+//		console.log( this.toString(), "onModalScroll" );
+		this.reposition();
+	},
+
+	reposition: function(){
+		if( this.picker && this.marshal.scrollContext == "modal" ){
+			var coords = this.visual.getCoordinates();
+			var left = coords.left;
+			this.picker.setStyles({
+				"top": coords.top + coords.height + this.options.positionOffset.y,
+				"left": left
+			});
+		}
+	},
+
+	destroy: function(){
+		mop.util.EventManager.removeListener( this );
+		mop.ModalManager.removeListener( this );
+		this.removeEvents();
+		this.parent();
+	}
+
+});
+
 /*	Class: mop.ui.DatePicker
 	mop.ui Wrapper for http://www.monkeyphysics.com/mootools/script/2/datepicker
 	@TODO add some kind of spinner element on save
@@ -1601,7 +1833,7 @@ mop.ui.DatePicker = new Class({
 	},
 	
 	buildPicker: function(){ 
-		this.picker = new Picker.Date( this.dateField, this, {
+		this.picker = new mop.ui.ExtendedMonkeyPhysicsDatePicker( this.dateField, this, {
 			elementId: "datePickerFor_" + this.fieldName,
 			startView: "month",
 			inputOutputFormat: "Y/m/d",
@@ -1609,8 +1841,7 @@ mop.ui.DatePicker = new Class({
 			allowEmpty: this.allowEmpty,
 			onShow: this.onShow.bind( this ),
 			onSelect: this.onSelect.bindWithEvent( this  ),
-			onClose: $empty,
-			useFadeInOut: !Browser.ie
+			onClose: $empty
 		});
 	},
 	
@@ -1733,7 +1964,7 @@ mop.ui.DateRangePicker = new Class({
 		this.allowEmpty = ( this.getValueFromClassName( "allowEmpty" ) == "true" )? true : false;
 		
 		this.dateFields.each( function( aDateField, index ){
-//			console.log( "DATERANGE",  index, aDateField, this.autoSubmit, this.allowEmpty, this.getValueFromClassName( "allowEmpty" ) );
+//			console.log( "DATERANGE",  index, aDateField, this.elementClass, this.autoSubmit, this.allowEmpty, this.getValueFromClassName( "allowEmpty" ) );
 			var opts = {
 				elementId: "datePickerFor_" + this.fieldName,
 				startView: ( mop.util.getValueFromClassName( "startView", this.element.get( "class" ) ) )?  mop.util.getValueFromClassName( "startView", this.element.get( "class" ) ) : "month",
@@ -1743,10 +1974,9 @@ mop.ui.DateRangePicker = new Class({
 				onShow: this.onShow.bind( this ),
 				onSelect: this.onSelect.bindWithEvent( this ),
 				onClose: $empty,
-				index: index,
-                useFadeInOut: !Browser.ie
+				index: index
 			};
-			var picker = new Picker.Date( aDateField, this, opts );
+			var picker = new mop.ui.ExtendedMonkeyPhysicsDatePicker( aDateField, this, opts );
 			aDateField.store( "Class", picker );
 		}, this );
 	},
@@ -2264,6 +2494,7 @@ mop.ui.FileElement = new Class({
 mop.util.Uploader = new Class({
 	
 	Extends: Swiff,
+
 	Implements: Events,
 	
 	box: null,
@@ -2272,16 +2503,7 @@ mop.util.Uploader = new Class({
 	fileList: [],
 	currentFileElementInstance: null,
 	status: null,
-	STATUS_QUEUED: 0,
-	STATUS_RUNNING: 1,
-	STATUS_ERROR: 2,
-	STATUS_COMPLETE: 3,
-	STATUS_STOPPED: 4,
-	unitLabels: {
-		b: [{min: 1, unit: 'B'}, {min: 1024, unit: 'kB'}, {min: 1048576, unit: 'MB'}, {min: 1073741824, unit: 'GB'}],
-		s: [{min: 1, unit: 's'}, {min: 60, unit: 'm'}, {min: 3600, unit: 'h'}, {min: 86400, unit: 'd'}]
-	},
-
+	
 	options: {
 		path: 'Swiff.Uploader.swf',
 		
@@ -2325,39 +2547,6 @@ mop.util.Uploader = new Class({
 		fileClass: null
 
 	},
-
-	log: function() {
-		if (window.console && console.info) console.info.apply(console, arguments);
-	},
-
-	formatUnit: function(base, type, join) {
-		var labels = Swiff.Uploader.unitLabels[(type == 'bps') ? 'b' : type];
-		var append = (type == 'bps') ? '/s' : '';
-		var i, l = labels.length, value;
-		if (base < 1) return '0 ' + labels[0].unit + append;
-		if (type == 's') {
-			var units = [];
-			for (i = l - 1; i >= 0; i--) {
-				value = Math.floor(base / labels[i].min);
-				if (value) {
-					units.push(value + ' ' + labels[i].unit);
-					base -= value * labels[i].min;
-					if (!base) break;
-				}
-			}
-		    return (join === false) ? units : units.join(join || ', ');
-		}
-		for (i = l - 1; i >= 0; i--) { value = labels[i].min; if (base >= value) break; }
-		return (base / value).toFixed(1) + ' ' + labels[i].unit + append;
-	},
-
-    qualifyPath: ( function() {
-	    var anchor;
-	    return function( path ) {
-		    ( anchor || ( anchor = new Element('a') ) ).href = path;
-		    return anchor.href;
-	    }
-	}),
 
 	initialize: function( options ) {
 
@@ -2560,7 +2749,7 @@ mop.util.Uploader = new Class({
 		// the data is saved right to the instance
 //		console.log( this.toString(), "update", data );
 		if( data ) this.currentFileElementInstance.showProgress( data );
-		this.append( data);
+		$extend(this, data);
 		this.fireEvent('queue', [this], 10);
 		return this;
 	},
@@ -2625,7 +2814,7 @@ mop.util.Uploader = new Class({
 
 		var data = this.options.data || {};
 		if ($type(append) == 'string') data[append] = hash;
-		else data.extend( hash );
+		else $extend(data, hash);
 
 //		console.log( this.toString(), "appendCookieData", data );
 
@@ -2733,6 +2922,63 @@ mop.util.Uploader = new Class({
 
 });
 
+$extend( mop.util.Uploader, {
+
+	STATUS_QUEUED: 0,
+	STATUS_RUNNING: 1,
+	STATUS_ERROR: 2,
+	STATUS_COMPLETE: 3,
+	STATUS_STOPPED: 4,
+
+	log: function() {
+		if (window.console && console.info) console.info.apply(console, arguments);
+	},
+
+	unitLabels: {
+		b: [{min: 1, unit: 'B'}, {min: 1024, unit: 'kB'}, {min: 1048576, unit: 'MB'}, {min: 1073741824, unit: 'GB'}],
+		s: [{min: 1, unit: 's'}, {min: 60, unit: 'm'}, {min: 3600, unit: 'h'}, {min: 86400, unit: 'd'}]
+	},
+
+	formatUnit: function(base, type, join) {
+		var labels = Swiff.Uploader.unitLabels[(type == 'bps') ? 'b' : type];
+		var append = (type == 'bps') ? '/s' : '';
+		var i, l = labels.length, value;
+
+		if (base < 1) return '0 ' + labels[0].unit + append;
+
+		if (type == 's') {
+			var units = [];
+
+			for (i = l - 1; i >= 0; i--) {
+				value = Math.floor(base / labels[i].min);
+				if (value) {
+					units.push(value + ' ' + labels[i].unit);
+					base -= value * labels[i].min;
+					if (!base) break;
+				}
+			}
+
+			return (join === false) ? units : units.join(join || ', ');
+		}
+
+		for (i = l - 1; i >= 0; i--) {
+			value = labels[i].min;
+			if (base >= value) break;
+		}
+
+		return (base / value).toFixed(1) + ' ' + labels[i].unit + append;
+	}
+
+});
+
+mop.util.Uploader.qualifyPath = ( function() {
+	var anchor;
+	return function( path ) {
+		( anchor || ( anchor = new Element('a') ) ).href = path;
+		return anchor.href;
+	};
+
+})();
 
 mop.ui.PulldownNav = new Class({
 	
@@ -3699,7 +3945,7 @@ mop.ui.ScrollableTable = new Class({
 		this.element = anElement;
 		this.table = anElement.getElement( "table" );
 		this.tableSize = this.table.getSize();
-		this.browser = { version: Browser.version, name: Browser.name };
+		this.browser = { version: Browser.Engine.version, name: Browser.Engine.name };
 //		console.log( "Browser: ", this.browser );
 		var newWidth = this.tableSize.x - 16;
 		this.element.setStyles({

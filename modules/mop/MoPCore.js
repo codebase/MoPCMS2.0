@@ -1,8 +1,10 @@
-
 // Section: Setting up environment for MoPCore.
 
 //	Redirects ie 6 to a landing page for that browser
-if( Browser.ie && Browser.version <= 4 ) window.location.href = $(document).getElement("head").getElement("base").get("href") + "msielanding";
+if( Browser.Engine.trident4 ) window.location.href = $(document).getElement("head").getElement("base").get("href") + "msielanding";
+
+/* Note: https://mootools.lighthouseapp.com/projects/2706/tickets/651-classtostring-broken-on-122-big-regression */
+Class.Mutators.toString = Class.Mutators.valueOf = $arguments(0);
 
 /*
 	Function: buildConsoleObject
@@ -16,7 +18,7 @@ function buildConsoleObject(){
 			window.console[names[i]] = function() {};
 		}
 		names = null;
-	}else if( Browser.webkit ){
+	}else if( Browser.Engine.webkit ){
 	    var names = [ "debug", "error", "assert", "dir", "dirxml", "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd"];
 	    for (var i = 0; i < names.length; ++i){
 			window.console[names[i]] = function() {};
@@ -127,6 +129,7 @@ mop.util.domIsReady = function(){
 	Is the passed value an integer or not?
 */
 mop.util.isUnsignedInteger = function( s ){
+    console.log( s );
     return ( s.toString().search(/^[0-9]+$/ ) == 0);
 }
 
@@ -416,6 +419,11 @@ mop.MoPObject = new Class({
 	*/
 	element: null,
 	/*
+		Variable: elementClass
+		Convenience variable getting the className from the element
+	*/
+	elementClass: null,
+	/*
 		Variable: marshal
 		This instance's delegate, ie. the object the next level up between this instance and the root controller.
 	*/
@@ -427,7 +435,8 @@ mop.MoPObject = new Class({
 	initialize: function( anElementOrId, aMarshal, options ){
 		this.setOptions( options );
 		this.element = $( anElementOrId );
-		this.marshal = aMarshal;
+		this.elementClass = this.element.get("class");
+		this.marshal = ( $type( aMarshal ) == "string" )? mop.ModuleManager.getModuleById( aMarshal ) : aMarshal;
 		this.element.store( 'Class', this );
 	},
 	/*
@@ -435,7 +444,7 @@ mop.MoPObject = new Class({
 		Convenience method that calls mop.util.getValueFromClassName;
 	*/	
 	getValueFromClassName: function( key ){
-		return mop.util.getValueFromClassName( key, this.element.get("class") );
+		return mop.util.getValueFromClassName( key, this.elementClass );
 	},
 	/*
 		Function: JSONSend
@@ -450,8 +459,8 @@ mop.MoPObject = new Class({
 	destroy: function(){
 	    this.element.destroy();
 	    this.element.eliminate( "Class" );
-	    delete this.element;
-	    this.element = this.marshal = null 
+	    delete this.element, this.elementClass;
+	    this.element = this.elementClass = this.marshal = null 
 	}
 
 });
@@ -463,7 +472,6 @@ mop.util.Broadcaster = new Class({
 
 	addListener: function( aListener ){
 		this.listeners.push( aListener );
-//		console.log( this.listeners );
 	},
 
 	removeListener: function( aListener ){
@@ -509,10 +517,10 @@ mop.util.HistoryManager = new Class({
 
 	Implements: mop.util.Broadcaster,
 	locationListener: null,
-	appState: {},
+	appState: new Hash(),
 	_instance: null,
-	appState: {},
-	registeredEvents: {},
+	appState: new Hash(),
+	registeredEvents: new Hash(),
 
 	initialize: function(){
 		return this;
@@ -530,8 +538,9 @@ mop.util.HistoryManager = new Class({
 	},
 
 	init: function( eventKey, eventString ){
-		this.registeredEvents[ eventKey ] = eventString;
+		this.registeredEvents.set( eventKey, eventString );
 		this.currentHash = this.getStrippedHash();
+//		console.log( "HistoryManager.init", this.currentHash );
 		this.storeStateFromHash();
 		this.startListening();
 	},
@@ -547,7 +556,7 @@ mop.util.HistoryManager = new Class({
 			keyValuePair = keyValuePair.split("-");
 			var key = keyValuePair[0];
 			var value = keyValuePair[1];
-			this.appState[ key ] = value;
+			this.appState.set( key, value );
 			key = null;
 			value = null;
 		}, this );
@@ -555,7 +564,7 @@ mop.util.HistoryManager = new Class({
 	},
 
 	getStrippedHash: function( ){
-		return ( window.location.hash && window.location.hash != "#" )? window.location.hash.substr( 1 , window.location.hash.length ) : null;
+		return $defined( window.location.hash && window.location.hash != "#" )? window.location.hash.substr( 1 , window.location.hash.length ) : null;
 	},
 	
 	checkLocation: function( ){
@@ -574,7 +583,7 @@ mop.util.HistoryManager = new Class({
 	},
 
 	changeState: function( key, value ){
-		this.appState[ key ] = value;
+		this.appState.set( key, value );
 		this.updateHash();
 	},
 
@@ -590,7 +599,7 @@ mop.util.HistoryManager = new Class({
 	},
 	
 	getValue: function( key ){
-			return ( this.appState[ key ] ) ? this.appState[ key ]  : null;
+			return ( this.appState.get( key ) ) ? this.appState.get( key ) : null;
 	},
 
 	fireEvents: function(){

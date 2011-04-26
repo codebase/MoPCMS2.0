@@ -81,7 +81,11 @@ mop.modules.List = new Class({
 		this.addItemDialogue = new mop.ui.EnhancedAddItemDialogue( null, this );
 		this.addItemDialogue.showLoading( e.target.get("text") );
 		
-		this.JSONSend( "addItem", null, { onComplete: function( json ){ this.onItemAdded( json ); }.bind( this ) } );
+		this.JSONSend( "addItem", null, { 
+			onComplete: function( json ){ 
+				this.onItemAdded( json ); 
+			}.bind( this )
+		});
 	},
 
 	onItemAdded: function( json  ){
