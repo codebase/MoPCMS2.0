@@ -21,7 +21,7 @@ mop.modules.Module = new Class({
 		Variable: UIElements
 		list of this module's UIElements
 	*/
-	UIElements: new Hash(),
+	UIElements: {},
 	/*
 		Variable: childModules
 		Modules loaded within this module
@@ -83,26 +83,26 @@ mop.modules.Module = new Class({
 		var descendantModules = ( whereToLook )? $( whereToLook ).getElements(".module") : this.element.getElements(".module");
 		var filteredOutModules = [];
 
-//		console.log( "initModules", this.toString(), this.childModules, descendantModules );
+		console.log( "initModules", this.toString(), ">>>> ", whereToLook, "<<<<", descendantModules );
 
 		descendantModules.each( function( aDescendant ){
 			descendantModules.each( function( anotherDescendant ){
-//			    console.log( "initModule, looping through descendant of", this.toString(), "\n\t", aDescendant,"\n\t", anotherDescendant );
-				if(  aDescendant.hasChild( anotherDescendant ) ) filteredOutModules.push( anotherDescendant );
+			    console.log( "\tLooping through children of", this.toString(), "\n\t", aDescendant,"\n\t", anotherDescendant );
+				if(  !aDescendant.contains( anotherDescendant ) ) filteredOutModules.push( anotherDescendant );
 			}, this );
 		}, this );
 		
-//		console.log( this.toString(), "\t\tfilteredOutModules", filteredOutModules );
+		console.log( this.toString(), "\t\tfilteredOutModules", filteredOutModules );
 		descendantModules.each( function( aDescendant ){
 			if( !filteredOutModules.contains( aDescendant ) ){
-        		if( !this.childModules ) this.childModules = new Hash();
+        		if( !this.childModules ) this.childModules = {};
 				var module = this.initModule( aDescendant );
 				var instanceName = module.instanceName;
-				this.childModules.set( instanceName, module );
+				this.childModules[ instanceName ] = module;
 			}
 		}, this );
 		
-//        console.log( "childModules", this.toString(), this.childModules );
+        console.log( "childModules", this.toString(), this.childModules );
         
         delete filteredOutModules, descendantModules;
         filteredOutModules = descendantModules = null;
@@ -158,7 +158,7 @@ mop.modules.Module = new Class({
 
 		UIElements.each( function( anElement ){
 		    var UIElement = new mop.ui[ mop.util.getValueFromClassName( "ui", anElement.get( "class" ) )  ]( anElement, this, this.options );
-		    this.UIElements.set( UIElement.fieldName, UIElement );
+		    this.UIElements[UIElement.fieldName] = UIElement;
 		}, this );
 		
 		if( this.postInitUIHook ) this.postInitUIHook();
