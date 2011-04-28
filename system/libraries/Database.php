@@ -255,6 +255,7 @@ class Database_Core {
 			$sql = $this->compile_binds($sql, $binds);
 		}
 
+		Kohana::log('info', $sql);
 		// Fetch the result
 		$result = $this->driver->query($this->last_query = $sql);
 

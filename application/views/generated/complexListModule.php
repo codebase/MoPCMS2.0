@@ -7,7 +7,10 @@
 
   <p class="description"> <?=$complexListListItem['description'];?></p>
 
-  <p class="singleCheckbox"> <?=$complexListListItem['singleCheckbox'];?></p>
+  <div type="checkboxResult">
+   <label>One</label>
+   <input type="checkbox" name="singleCheckbox" <?echo ($complexListListItem['singleCheckbox'])?'checked="true" ':'';?> disabled="disabled" >
+  </div>
 
   <p class="singleRadioGroup"> <?=$complexListListItem['singleRadioGroup'];?></p>
 

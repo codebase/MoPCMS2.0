@@ -38,5 +38,9 @@
 
         <view name="complexListModule" loadPage="true">
         </view>
+
+				<view name="csvtest" loadPage="false">
+					<includeData label="csv" />
+				</view>
 </configuration>
 
