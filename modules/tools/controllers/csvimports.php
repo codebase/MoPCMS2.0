@@ -8,6 +8,7 @@ Class CsvImports_Controller extends Controller {
 	 */
 	public function createImportTemplateFilled($view){
 			$data = mop::getViewContent($view);
+			print_r($data);
 
 			$outputCSV = fopen('application/media/'.$view.'.csv', 'w');
 			
@@ -16,24 +17,25 @@ Class CsvImports_Controller extends Controller {
 			$columns = array();
 			foreach($data['content']['csv'] as $item){
 					foreach($item as $field => $value){
+					//	$label = mop::config('objects', 
 						$columns[$field] = $field;
 					}	
 			}
 			fputcsv($outputCSV, $columns);
 
-			print_r($columns);
+	//		print_r($columns);
 
 			//output the file
 			foreach($data['content']['csv'] as $item){
 				$output = array();
-				foreach($columns as $column){
+				foreach($columns as $column => $label){
 					if(isset($item[$column])){
 						$output[] = $item[$column];
 					} else {
 						$output[] = '';
 					}
 				}
-				print_r($output);
+	//			print_r($output);
 				fputcsv($outputCSV, $output);
 			}
 
