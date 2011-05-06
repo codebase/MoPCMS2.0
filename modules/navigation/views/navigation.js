@@ -26,6 +26,7 @@ mop.modules.navigation.Navigation = new Class({
 		this.navElement = this.element.getElement( ".nav" );
 		
 		this.userLevel = ( Cookie.read( 'userLevel' ) )? Cookie.read( 'userLevel' ) : "superuser";
+		this.userLevel = 'normal';
 		console.log( this.userLevel );
 		
 		this.breadCrumbs =  new mop.ui.navigation.BreadCrumbTrail( this.element.getSibling( ".breadCrumb" ), this.onBreadCrumbClicked.bind( this ) );
@@ -381,11 +382,13 @@ console.log( "A : ", newList );
 		}
 		
 		if( this.userLevel == "superuser" ){
+			/*
 		    console.log( "superuser", aNode.id, this, whichTier );
 		    var node = new mop.modules.navigation.SuperUserUtilityNode( aNode.id, this, whichTier, aNode.title );
 			tier.unshift( node );
 			console.log( ":: ", node.element );
 	        tierElement.getSibling(".utility").adopt( node.element );
+					*/
 		}
 		
 		if( utilityNode ){

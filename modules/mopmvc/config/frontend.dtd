@@ -16,7 +16,7 @@
 
 <!ELEMENT includeData ANY >
 <!ATTLIST includeData
-	from		 		CDATA "parent"
+	from		 		CDATA #IMPLIED
 	label				CDATA #REQUIRED
 	templateFilter CDATA "all"
 	where       CDATA #IMPLIED

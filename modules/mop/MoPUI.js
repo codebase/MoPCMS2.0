@@ -3304,14 +3304,10 @@ mop.ui.Sticky = new Class({
 		
 		// 
 		var pos = this.marshal.element.getCoordinates();
-//		var top = ( this.marshal.scrollContext == "modal" )? ( pos.top - pos.height*.75 ) - mop.ModalManager.getActiveModal().element.getScroll().y : pos.top - pos.height*.75;
 		var top = pos.top - pos.height*.75;
 		var inModal = ( this.marshal.scrollContext == "modal" || this.marshal.options.scrollContext == "modal" );
 		//@TODO, reconcile location of scrollContext, its either an option on a property, should probably be an option, since it gets passed to ui constructors from module 
 		var left = ( inModal )? mop.ModalManager.getActiveModal().element.getCoordinates().left + pos.left : pos.left;
-		
-//		console.log( "repositioning", this.toString(), this.marshal.toString(), "{ inModal:", inModal, "}", this.marshal.fieldName, "{ activeModal.coords: ", mop.ModalManager.getActiveModal().element.getCoordinates().left, mop.ModalManager.getActiveModal().element.getCoordinates().top, "}", "{ marshalCoords: ", pos.left, pos.top, "}", top, left );
-
 		var zIndex = mop.DepthManager.incrementDepth();
 		this.element.setStyles({
 			"top" : top,
@@ -3482,14 +3478,9 @@ mop.ui.Text = new Class({
 		this.rows = this.getValueFromClassName( "rows" );
 		this.ogBgColor = this.ipeElement.getStyle("background-color");
 		this.ogTextColor = this.ipeElement.getStyle("color");
-
 		this.enableElement();
-		
 		this.ipeElement.set( "title", this.options.messages.clickToEdit );
-		this.ipeElement.setStyle( "height", "auto" );
-
 		this.oldValue = this.ipeElement.get( "html" );
-
 	},
 
 	toString: function(){
@@ -3549,6 +3540,7 @@ mop.ui.Text = new Class({
 	},
 	
 	fitToContent: function(){   
+	    console.log( "FIT-TO-CONTENT" );
         if( !this.measureDiv ){
             this.measureDiv = new Element( "div", { 
                 "class": this.field.get( "class" ) + " " + this.ipeElement.get("class"),
@@ -3585,6 +3577,7 @@ mop.ui.Text = new Class({
 
 		var opts;
 		if( this.rows > 1 ){
+		    console.log( this.fieldName, "ROWS > 1" );
 			opts = {
 				"rows": this.rows,
 				"cols": this.cols,
@@ -3605,8 +3598,7 @@ mop.ui.Text = new Class({
 				"class": "ipeField " + this.ipeElement.get( "tag" ),
 				"value": this.formatForEditing( contents ),
 				"styles": {
-					"width": size.x,
-					"height": size.y
+					"width": size.x
 				}
 			}
 			this.field = new Element( tag, opts );

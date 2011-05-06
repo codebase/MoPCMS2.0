@@ -227,7 +227,7 @@ Class mop {
 		if($object){
 			$includeContent = mop::getIncludeContent($viewConfig, $object->id);
 		} else {
-			$includeContent = mop::getIncludeContent($viewConfig);
+			$includeContent = mop::getIncludeContent($viewConfig, 'nothing');
 		}
     foreach($includeContent as $key=>$values){
       $data['content'][$key] = $values;
@@ -267,7 +267,7 @@ Class mop {
 		return $data;
 	}
 
-  function getIncludeContent($includeTier, $parentid = Null){
+  function getIncludeContent($includeTier, $parentid = 'nothing'){
     $content = array();
     if($eDataNodes = mop::config('frontend',"includeData", $includeTier)){
       foreach($eDataNodes as $eDataConfig){
@@ -276,7 +276,7 @@ Class mop {
 
         //apply optional parent filter
         $from = $eDataConfig->getAttribute('from');
-				if($from=='parent' && $parentid != null){
+				if($from=='parent' && $parentid != 'nothing'){
 					$objects->where('parentid', $parentid);
 				} else if($from){
 					$from = ORM::Factory('page', $from);
@@ -299,7 +299,6 @@ Class mop {
 
         $label = $eDataConfig->getAttribute('label');
         $items = array();
-				echo count($objects);
         foreach($objects as $includeObject){
           $itemsData = $includeObject->getContent();
           $itemsData = array_merge($itemsData, mop::getIncludeContent($eDataConfig, $includeObject->id ) );

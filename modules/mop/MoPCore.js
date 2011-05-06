@@ -472,6 +472,7 @@ mop.util.Broadcaster = new Class({
 
 	addListener: function( aListener ){
 		this.listeners.push( aListener );
+		console.log( this.listeners );
 	},
 
 	removeListener: function( aListener ){
@@ -479,9 +480,9 @@ mop.util.Broadcaster = new Class({
 	},
 
 	broadcastEvent: function( eventToFire ){
-//		console.log( "broadcastEvent", eventToFire );
+		console.log( "broadcastEvent", eventToFire );
 		this.listeners.each( function( aListener ){
-//			console.log( "::::", aListener.toString(), eventToFire );
+			console.log( "::::", aListener.toString(), eventToFire );
 			aListener.fireEvent( eventToFire );
 		});
 	}

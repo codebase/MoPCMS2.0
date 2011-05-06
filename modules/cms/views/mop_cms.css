@@ -46,6 +46,12 @@ h2,
 	margin-bottom: 0 !important;
 }
 
+.indeditable{
+    background: #0cf;
+    padding: .5em .25em;
+}
+
+
 h3,
 .h3 {
 	font-size: 2.25em;	/* 27px */
@@ -97,6 +103,7 @@ h6,
 .ui-Text .ipe{
 	border: none;
 	background: #FFFAC4; 
+	min-height: 2em;
 }
 
 .displayField,
@@ -270,21 +277,13 @@ ul.listing li{
 }
 
 ul.listing.allowChildSort-true li{ cursor: pointer; }
-.itemControls, .controls{ clear: both; height: 2em; }
 
 .classPath-mop_modules_ListModule{ margin-bottom: 2em; }
 
-.listItem>.itemControls .delete{
-	width: 16px;
-	height:16px;
-	display:block;
-	background: url( images/icon_trash.gif );
-}
-
 .icon.spinner{
-	width: 16px;
-	height:16px;
-	display:block;
+/*  width: 16px;
+    height:16px;
+*/	display:block;
 	background: url( ../../mopui/views/images/spinner.gif );
 }
 
@@ -374,19 +373,18 @@ ul.listing.allowChildSort-true li{ cursor: pointer; }
 .pageTitle .deleteLink{ margin: 2em 0 0 .5em; }
 .pageTitle .field-slug{ margin: .5em 0 0 0; clear: both; }
 .pageTitle .field-slug label{ float: left; line-height: 2.25; }
-.pageTitle .field-slug p.ipe, .pageTitle .field-slug .IPEForm{ margin: 0 0 0 5  em !important; }
+.pageTitle .field-slug p.ipe, .pageTitle .field-slug .IPEForm{ margin: 0 0 0 5em !important; }
 .pageTitle .field-slug .IPEField{ width: 12em !important; }
 
 a.icon{
-	display:block;
-	float:left;
+	display:inline-block;
 	width: 16px;
 	height: 16px;
 	margin:.25em .125em;
+	text-indent: -3000em;
 }
 
-a.icon span{ display: none; }
-
+a.icon.delete,
 a.icon.deleteLink{ background: url(images/icon_delete.png); }
 
 a.delete:hover{ background: url(images/icon_delete_hover.png); }
@@ -541,6 +539,7 @@ a.button{
 
 .modal .controls,
 .modal .itemControls{
+    clear: both;
 	margin-top:1.5em;
 }
 
@@ -569,7 +568,6 @@ a.button{
 }
 
 .centeredSpinner{
-	min-height: 12em;
 	background:#eee url( ../../mopui/views/images/spinner.gif ) 50% 50% no-repeat !important;
 }
 
@@ -605,14 +603,15 @@ th.spinner{
 .boxModule>*{ margin-left: 12px; }
 
 input[type='radio']{ margin-top: .5em; }
-.ipe{ height: auto !important; }
+
+.ipe{ min-height: 1em; }
 .rows-10 .ipe{ min-height: 10em; }
 .rows-6 .ipe{ min-height: 6em; }
 .rows-5 .ipe{ min-height: 5em; }
 .rows-4 .ipe{ min-height: 4em; }
 .rows-3 .ipe{ min-height: 5em; }
 .rows-2 .ipe{ min-height: 2em; }
-
+    
 input[type='radio']{ display: inline; }
 
 .ui-RadioGroup{ margin-bottom:.5em; }

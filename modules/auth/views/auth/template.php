@@ -4,7 +4,7 @@
 		<div class="container">
 			<?if(isset($message)):?><?=$message;?><?endif;?>
 			<?=$content;?>
-			<a href="auth/forgot/">Forgot your password?</a> 
+			<a class="push_1" href="auth/forgot/">Forgot your password?</a> 
 		</div>
 	</div>
 	<a class="modalAnchor"></a>

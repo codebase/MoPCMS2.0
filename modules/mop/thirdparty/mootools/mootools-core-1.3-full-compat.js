@@ -3874,6 +3874,7 @@ Element.implement({
 		} else if (value == String(Number(value))){
 			value = Math.round(value);
 		}
+		console.log( "setStyle ", property, value );
 		this.style[property] = value;
 		return this;
 	},
@@ -4602,6 +4603,7 @@ Fx.CSS = new Class({
 	//prepares the base from/to object
 
 	prepare: function(element, property, values){
+		console.log( "prepare", element.innerHTML, property, values );
 		values = Array.from(values);
 		if (values[1] == null){
 			values[1] = values[0];

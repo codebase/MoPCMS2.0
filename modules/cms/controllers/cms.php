@@ -53,15 +53,6 @@ class CMS_Controller extends CMS_Interface_Controller {
 
 	}
 
-	public function createIndexView(){
-		parent::createIndexView();
-		if(Auth::instance()->logged_in('superuser')){
-			$this->view->userlevel = 'superuser';
-		} else {
-			$this->view->userlevel = 'basic';
-		}	
-	}
-
 	/*
 	 * Function: setPageId($page_id)
 	 * Sets the page id of the object currently being edited
@@ -98,6 +89,7 @@ class CMS_Controller extends CMS_Interface_Controller {
 
 
 		$controller = $id;
+		
 		if(Kohana::find_file('controllers', $controller)){
 			$controller = $id.'_Controller';
 			$controller = new $controller;
@@ -139,7 +131,7 @@ class CMS_Controller extends CMS_Interface_Controller {
 		
 		$nodetitlehtml = $this->nodetitle->render();
 
-		$customview = 'templates/'.$page->template->templatename; //check for custom view for this template
+		$customview = 'cms_'.$page->template->templatename; //check for custom view for this template
     	$htmlChunks = cms::buildUIHtmlChunksForObject($page);
 
 		$usecustomview = false;
@@ -151,6 +143,7 @@ class CMS_Controller extends CMS_Interface_Controller {
 		} else {
 			$html = $nodetitlehtml;
 			$view = new View($customview);
+         $view->objectId = $id;
 			$view->loadResources();
 			foreach($htmlChunks as $key=>$value){
 				$view->$key = $value;

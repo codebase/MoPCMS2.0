@@ -25,6 +25,9 @@ Class UserManagement_Controller extends Controller {
 	 */
 	protected $managedRoles;
 
+	
+	protected $roleFilters = array();
+	
 	/*
 	 * Function: __construct()
 	 * Loads managedRoles and calls the parent constructor
@@ -55,7 +58,23 @@ Class UserManagement_Controller extends Controller {
 
 		$users = ORM::Factory($this->table)->find_all();
 		$html = '';
+		$roleFilters = Kohana::config(strtolower($this->controllername).'.roleFilters');
 		foreach($users as $user){
+		
+			$inSelection = TRUE;
+			if(count($roleFilters)){
+				$inSelection = FALSE;
+		   	foreach($roleFilters as $filterRole){
+					if($user->has(ORM::Factory('role', $filterRole))){
+						$inSelection = TRUE;
+						break;
+					}
+		  		}
+			} 
+			if(!$inSelection){
+				continue;
+			}
+				  
 			$usertemplate = new View($this->viewName.'_item');
 			$data['id'] = $user->id;
 			$data['username'] = $user->username;
@@ -120,9 +139,12 @@ Class UserManagement_Controller extends Controller {
 		$user->save();
 
 		//add the login role
-		$user->add(ORM::Factory('role', 'login'));
-		$user->add(ORM::Factory('role', 'admin'));
-		$user->add(ORM::Factory('role', 'staging'));
+		foreach(Kohana::config(strtolower($this->controllername).'.addWithRoles') as $addRole){
+		  $user->add(ORM::Factory('role', $addRole));
+		}
+		// 'login
+	//	$user->add(ORM::Factory('role', 'admin'));
+		//$user->add(ORM::Factory('role', 'staging'));
 		$user->save();
 
 		return $user;
@@ -185,7 +207,7 @@ Class UserManagement_Controller extends Controller {
 					$body = new View('usermanagement_passwordchangeemail');
 					$body->username = $user->username;
 					$body->password = $_POST['value'];	
-
+               $headers = 'From: '.Kohana::config('usermanagement.passwordchangeemail.from') . "\r\n";
 					mail($user->email, Kohana::config('usermanagement.passwordchangeemail.subject'), $body->render());
 					$md5 = $user->password;
 					$return = array('value'=>$md5);

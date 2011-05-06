@@ -20,6 +20,8 @@ $config['resources']['js'] = array(
  * The subject of the password reset email
  */
 $config['passwordchangeemail']['subject'] = 'MoPCMS Password Changed';
+$config['passwordchangeemail']['from'] = 'deepwinter@winterroot.net';
+
 
 /*
  * Config: ['managedRoles']
@@ -29,3 +31,13 @@ $config['passwordchangeemail']['subject'] = 'MoPCMS Password Changed';
 $config['managedRoles'] = array();
 
 //array('Call Center'=>'callcenter', 'Admin'=>'admin');
+
+$config['roleFilters'] = array(
+	 'admin'
+);
+
+$config['addWithRoles'] = array(
+	 'login',
+	 'admin',
+	 'staging'
+);

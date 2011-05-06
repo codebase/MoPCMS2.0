@@ -56,6 +56,7 @@ ul.breadCrumb li a:hover{
 .field-title.grid_8{
     margin-left: 0;
 }
+
 #navigation h5{
 	font-size: 1em;
 	white-space: normal !important;
@@ -128,6 +129,11 @@ ul.breadCrumb li a:hover{
 
 #navigation  a.icon[class~="hidden"]{
 	display:none;
+}
+
+#navigation li.node.active h5,
+#navigation li.node:hover h5{
+    color: #fff;
 }
 
 #navigation li.placeHolder h5{
