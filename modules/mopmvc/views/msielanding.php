@@ -4,7 +4,7 @@
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-	<title>NTVB Integrated Site Management via MoPCMS - Internet Explorer Landing Page</title>
+	<title>Internet Explorer Landing Page</title>
 
 	<style type="text/css">
 		/* reset.css */
