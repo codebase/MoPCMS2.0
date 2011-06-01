@@ -40,31 +40,6 @@ class dumper_Controller extends Controller {
     return $fields;
   }
 
-  private function exportTier($objects){
-
-    $nodes = array();
-    foreach($objects as $object){
-      $item = $this->doc->createElement($object->template->templatename);
-
-      foreach($this->getObjectFields($object) as $field){
-        $item->appendChild($field);
-      }
-
-      //and get the children
-      $childObjects = ORM::Factory('page')
-        ->where('activity IS NULL')
-        ->where('published = 1')
-        ->where('parentid', $object->id)
-        ->find_all();
-      foreach($this->exportTier($childObjects) as $childItem){
-        $item->appendChild($childItem);
-      }
-      $nodes[] = $item;
-    }
-
-    return $nodes;
-  }
-
 	public function export($xslt=''){
 		//get directory listing of application/media
 
