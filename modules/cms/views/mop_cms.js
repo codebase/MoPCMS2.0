@@ -55,7 +55,7 @@ mop.modules.CMS = new Class({
         
 		var pageData = new Hash( pageJSON );
 		pageData.css.each( function( element, index ){ mop.util.loadStyleSheet( element ); });
-
+        console.log( "onPageLoaded!!!!!!!!!!!!!!!!!!!!!!!!", pageJSON );
 		$("nodeContent").unspin();
 
 		var scripts = pageData.js;
@@ -67,8 +67,9 @@ mop.modules.CMS = new Class({
 		if( this.scriptsTotal && this.scriptsTotal > 0 ){
 			scripts.each( function( urlString ){
 			    console.log( this.toString(), "loadJS loading ", urlString );
-				mop.util.loadJS( urlString, { type: "text/javascript", onload: this.onJSLoaded.bind( this, [ pageData.html, this.currentPageLoadIndex ] ) } );
-			}, this);			
+                // new Asset.javascript( urlString, { onLoad: this.onJSLoaded.pass( [ pageData.html, this.currentPageLoadIndex ], this ) } );
+                new Asset.javascript( urlString, { onload: this.onJSLoaded.pass( [ pageData.html, this.currentPageLoadIndex ], this ) } );
+			}, this );
 		}else{
 			this.populate( pageData.html );
 		}
@@ -78,19 +79,18 @@ mop.modules.CMS = new Class({
 	onJSLoaded: function( pageHTML, pageLoadCount ){
 		// keeps any callbacks from previous pageloads from registering
 		if( pageLoadCount != this.currentPageLoadIndex ) return;
-		
 		this.scriptsLoaded++;
-		
-		if( this.scriptsLoaded == this.scriptsTotal ){
-			
+		console.log( "::::: ", this.scriptsLoaded, this.scriptsTotal );
+		if( this.scriptsLoaded == this.scriptsTotal ){			
 			this.scriptsTotal = null;
 			this.populate( pageHTML );
-
 		}
 	},
 	
 	
 	populate: function( html ){
+	    
+	    console.log( "::", this.toString(), "populate", html );
 		
 		this.pageContent.set( 'html', html );
 

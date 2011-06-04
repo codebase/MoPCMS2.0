@@ -1,16 +1,4 @@
-/* *** GLOBAL ( NON CMS ) *** */
 
-/* reset.css */
-html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, code, del, dfn, em, img, q, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td {margin:0;padding:0;border:0;font-weight:inherit;font-style:inherit;font-size:100%;font-family:inherit;vertical-align:baseline;}
-table {border-collapse:separate;border-spacing:0;}
-caption, th, td {text-align:left;font-weight:normal;}
-blockquote:before, blockquote:after, q:before, q:after {content:"";}
-blockquote, q {quotes:"" "";}
-a img {border:none;}
-
-html, body{
-
-}
 /* typography.css */
 body {
 	color:#222;
@@ -21,8 +9,9 @@ body {
 	padding-bottom:6em;
 }
 
-h1, h2, h3, h4{
-	font-weight:normal;color:#121212;
+h1, h2, h3, h4, h5{
+	font-weight:normal;
+	color:#121212;
 }
 
 h1,
@@ -46,9 +35,10 @@ h2,
 	margin-bottom: 0 !important;
 }
 
-.indeditable{
-    background: #0cf;
-    padding: .5em .25em;
+.ratingsReadout{
+    border: 1px #47AEF4 solid !important;
+    background: #DEF1FC;
+    padding: .5em 1em;
 }
 
 
@@ -81,7 +71,8 @@ h6,
 	clear: both;
 }
 
-.textField{
+.textField,
+.ineditable{
 	font-family: Georgia, Times, Serif;
 	padding: 0 !important; 
 }
@@ -99,11 +90,15 @@ h6,
 	margin-left: 20em;
 }
 
+.indeditable{
+    background: #0cf;
+    padding: .5em .25em;
+}
+
 .displayField,
 .ui-Text .ipe{
 	border: none;
 	background: #FFFAC4; 
-	min-height: 2em;
 }
 
 .displayField,
@@ -221,7 +216,8 @@ caption {
 
 #container {
 	width: 900px;
-	height: 100%;
+	min-height: 12em;
+/*  height: 100%; */
 	margin:0 auto;
 }
 
@@ -277,13 +273,21 @@ ul.listing li{
 }
 
 ul.listing.allowChildSort-true li{ cursor: pointer; }
+.itemControls, .controls{ clear: both; height: 2em; }
 
 .classPath-mop_modules_ListModule{ margin-bottom: 2em; }
 
+.listItem>.itemControls .delete{
+	width: 16px;
+	height:16px;
+	display:block;
+	background: url( ../../mopui/views/images/icon_trash.gif );
+}
+
 .icon.spinner{
-/*  width: 16px;
-    height:16px;
-*/	display:block;
+	width: 16px;
+	height:16px;
+	display:block;
 	background: url( ../../mopui/views/images/spinner.gif );
 }
 
@@ -297,11 +301,16 @@ ul.listing.allowChildSort-true li{ cursor: pointer; }
 .ui-FileElement .controls a,
 .ui-File .controls a,
 .ui-ImageFile .controls a{
+    display: inline-block;
+    text-align: center;
 	background: none;
-	text-decoration: underline;
-	font-size: 10px;
+	text-decoration: none;
+	border-bottom: 1px #0af solid;
+	font-size: 12px;
+	width: 16px;
 	margin-left: 6px;
 	color: #0af;
+	padding: .5em 0 .25em 0;
 }
 
 .ui-FileElement .controls a:hover,
@@ -316,29 +325,16 @@ ul.listing.allowChildSort-true li{ cursor: pointer; }
 }
 
 .ui-FileElement img{
-	border: .5em #eee solid;
+	border: 1px #eee solid;
 }
 
 .cluster .wrapper,
 .ui-FileElement .wrapper,
 .ui-ImageFile .wrapper,
 .ui-File .wrapper{
-	background: #f3f3f3;
 	margin:0 0 .5em 0;
 }
 
-
-.ui-FileElement .fileName,
-.ui-ImageFile .fileName,
-.ui-File .fileName{
-	height: 16px;
-	color: #aaa;
-	font-size: 80%;
-	background-repeat:no-repeat;
-	background-position: .25em .25em;
-	padding: 1em .25em .125em 3em;
-	margin:0 0 .5em 0;
-}
 
 .ui-ImageFile .preview{
 	margin:1em 0;
@@ -360,42 +356,50 @@ ul.listing.allowChildSort-true li{ cursor: pointer; }
 	margin:0 auto;
 }
 
-.fileName{ background-repeat: no-repeat; background-image: url( ../../mopui/views/images/icon_doc.gif ) 1em 0; }
-.fileName.pdf{ background-image: url(images/icon_pdf.gif) 1em 0; }
-.fileName.doc{ background-image: url( ../../mopui/views/images/icon_doc.gif ) 1em 0; }
-.fileName.jpg, .fileName.jpeg{	background-image: url(images/icon_jpg.gif) 1em 0; }
-.fileName.gif{ background-image: url(images/icon_gif.gif) 1em 0; }
-.fileName.png{ background-image: url(images/icon_png.gif) 1em 0; }
+.fileName{ 
+    background-image: url( ../../mopui/views/images/icon_doc.gif );
+    background-repeat: no-repeat;
+    background-position: 0 0;
+	height: 16px;
+	color: #aaa;
+	font-size: .875;
+	padding: 0 .25em .125em 2em;
+	margin:0 0 1.25em 0;
+}
+.fileName.pdf{ background-image: url( ../../mopui/../../mopui/views/images/icon_pdf.gif) }
+.fileName.doc{ background-image: url( ../../mopui/views/images/icon_doc.gif ) }
+.fileName.img{	background-image: url( ../../mopui/views/images/icon_jpg.gif) }
 
 #nodeContent{ margin: 2em 0 0 0; }
 
 .pageTitle{ margin: 0 0 2em 0; }
-.pageTitle .deleteLink{ margin: 2em 0 0 .5em; }
+.pageTitle .deleteLink{ margin: 2em 0 0 .875em; }
 .pageTitle .field-slug{ margin: .5em 0 0 0; clear: both; }
 .pageTitle .field-slug label{ float: left; line-height: 2.25; }
 .pageTitle .field-slug p.ipe, .pageTitle .field-slug .IPEForm{ margin: 0 0 0 5em !important; }
 .pageTitle .field-slug .IPEField{ width: 12em !important; }
 
 a.icon{
-	display:inline-block;
+	display:block;
+	float:left;
 	width: 16px;
 	height: 16px;
 	margin:.25em .125em;
-	text-indent: -3000em;
 }
 
-a.icon.delete,
-a.icon.deleteLink{ background: url(images/icon_delete.png); }
+a.icon span{ display: none; }
 
-a.delete:hover{ background: url(images/icon_delete_hover.png); }
+a.icon.deleteLink{ background: url(../../mopui/views/images/icon_delete.png); }
 
-a.icon.submit{ background: url(images/icon_confirm.png); }
+a.delete:hover{ background: url(../../mopui/views/images/icon_delete_hover.png); }
 
-a.icon.cancel{ background: url(images/icon_cancel.png); }
+a.icon.submit{ background: url(../../mopui/views/images/icon_confirm.png); }
 
-.active a.icon.submit, a.icon.submit:hover{ background: url(images/icon_confirm_hover.png); }
+a.icon.cancel{ background: url(../../mopui/views/images/icon_cancel.png); }
 
-.active a.icon.cancel, a.icon.cancel:hover{ background: url(images/icon_cancel_hover.png); }
+.active a.icon.submit, a.icon.submit:hover{ background: url(../../mopui/views/images/icon_confirm_hover.png); }
+
+.active a.icon.cancel, a.icon.cancel:hover{ background: url(../../mopui/views/images/icon_cancel_hover.png); }
 
 .invisible{ visibility: hidden; }
 
@@ -448,8 +452,8 @@ a.button{
 }
 
 .enhancedModalContainer .modal{
-	margin: 7em auto 2em auto;	
-	width: 50em;
+	margin: 9em auto 2em auto;	
+	width: 850px;
 	z-index:11001;
 	background: #fff;
 	padding: 2em 2em 0  2em;
@@ -461,8 +465,8 @@ a.button{
 	left: 50%;
 	top: 0;
 	padding: 2em 2em 0 2em;
-	width: 50em;
-	margin: 0 auto 0 -27.6em;
+	width: 850px;
+	margin: 0 auto 0 -456px;
 	background: url( images/bgk94.png );
 	color:#fff;
 }
@@ -539,7 +543,6 @@ a.button{
 
 .modal .controls,
 .modal .itemControls{
-    clear: both;
 	margin-top:1.5em;
 }
 
@@ -568,6 +571,7 @@ a.button{
 }
 
 .centeredSpinner{
+	min-height: 12em;
 	background:#eee url( ../../mopui/views/images/spinner.gif ) 50% 50% no-repeat !important;
 }
 
@@ -603,15 +607,14 @@ th.spinner{
 .boxModule>*{ margin-left: 12px; }
 
 input[type='radio']{ margin-top: .5em; }
-
-.ipe{ min-height: 1em; }
+.ipe{ height: auto !important; }
 .rows-10 .ipe{ min-height: 10em; }
 .rows-6 .ipe{ min-height: 6em; }
 .rows-5 .ipe{ min-height: 5em; }
 .rows-4 .ipe{ min-height: 4em; }
 .rows-3 .ipe{ min-height: 5em; }
 .rows-2 .ipe{ min-height: 2em; }
-    
+
 input[type='radio']{ display: inline; }
 
 .ui-RadioGroup{ margin-bottom:.5em; }
@@ -1003,8 +1006,8 @@ DATE PICKER
 
 .ui-MultiSelect p,
 .ui-DatePicker input[type~='text'],
-.ui-DateRangePicker input[type~='text']{
-
+.ui-DateRangePicker input[type~='text'],
+.ratingsReadout{
 	color:#222;
 	font-family: Georgia, Times, Serif;
 	margin: 0 0 .5em 0;
@@ -1216,4 +1219,27 @@ ul.listing li.menuItem:hover{
     background: #0af;
     color: #fff;
     
+}
+
+.tags h4{
+	margin-top: 2em;
+	margin-bottom: .5em;
+	font-family: Georgia, Times, serif;
+}
+
+
+ul.taglist{
+	list-style: none;
+	border-top: 1px #dedede solid;
+}
+
+ul.taglist li{
+	border-bottom: 1px #dedede solid;
+	height: 40px;
+}
+
+ul.taglist li input{
+	display: block;
+	float: left;
+	margin: .25em 1em 2em 0;
 }
