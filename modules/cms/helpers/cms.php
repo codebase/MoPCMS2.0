@@ -21,7 +21,7 @@ class CMS {
 		if($title!=NULL){
 
 
-			$slug = preg_replace('/[^a-z0-9 ]/', '', strtolower($title));
+			$slug = preg_replace('/[^a-z0-9\- ]/', '', strtolower($title));
 			$slug = str_replace(' ', '-', $slug);
 			$slug = trim($slug);
 			$checkSlug = ORM::Factory('page')
