@@ -19,20 +19,11 @@ class CMS {
 	public static function createSlug($title=NULL, $forPageId=NULL){
 		//create slug
 		if($title!=NULL){
-			$removeChars = array(
-				"'",
-				'"',
-				'&',
-				'?',
-				'/',
-				'\\',
-				')',
-				'(',
-			);
-			Kohana::log('info', $title);
-			$slug = str_replace($removeChars, '', strtolower($title));
-			$slug = str_replace(' ', '-', strtolower($slug));
-			Kohana::log('info', $slug);
+
+
+			$slug = preg_replace('/[^a-z0-9 ]/', '', strtolower($title));
+			$slug = str_replace(' ', '-', $slug);
+			$slug = trim($slug);
 			$checkSlug = ORM::Factory('page')
 				->regex('slug', '^'.$slug.'[0-9]*$')
 				->orderby("slug");
